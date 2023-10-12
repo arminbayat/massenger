@@ -7,8 +7,10 @@ import AuthSocialButton from "./AuthSocialButton";
 import { BsGithub, BsGoogle } from "react-icons/bs";
 import { useCallback, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
-
+import { signIn } from "next-auth/react";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { error } from "console";
 
 type Variant = "LOGIN" | "REGISTER";
 
@@ -40,21 +42,47 @@ const AuthForm = () => {
     setIsLoading(true);
 
     if (variant === "REGISTER") {
-      axios.post("/api/register", data);
+      axios
+        .post("/api/register", data)
+        .catch(() => toast.error("somting went wrong!"))
+        .finally(() => setIsLoading(false));
     }
     if (variant === "LOGIN") {
-      //SingIn
+      signIn("credentials", {
+        ...data,
+        redirect: false,
+      })
+        .then((callback) => {
+          if (callback?.error) {
+            toast.error("Invalid credentials");
+          }
+
+          if (callback?.ok && !callback?.error) {
+            toast.success("logged in!");
+          }
+        })
+        .finally(() => setIsLoading(false));
     }
   };
 
-  const socialAction = (actions: string) => {
+  const socialAction = (action: string) => {
     setIsLoading(true);
+    signIn(action, { redirect: false }).then((callback)=>{
+        if (callback?.error) {
+            toast.error("Invalid credentials");
+          }
+
+          if (callback?.ok && !callback?.error) {
+            toast.success("logged in!");
+          }
+    })
+    .finally(() => setIsLoading(false));
   };
 
   return (
     <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <div className="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
-        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} >
+        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           {variant === "REGISTER" && (
             <Input
               id="name"
