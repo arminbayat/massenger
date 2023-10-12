@@ -8,6 +8,8 @@ import { BsGithub, BsGoogle } from "react-icons/bs";
 import { useCallback, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 
+import axios from "axios";
+
 type Variant = "LOGIN" | "REGISTER";
 
 const AuthForm = () => {
@@ -34,11 +36,11 @@ const AuthForm = () => {
     },
   });
 
-  const onSubmit: SubmitHandler<FieldValues> = (dara) => {
+  const onSubmit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
 
     if (variant === "REGISTER") {
-      //Register
+      axios.post("/api/register", data);
     }
     if (variant === "LOGIN") {
       //SingIn
@@ -52,9 +54,15 @@ const AuthForm = () => {
   return (
     <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <div className="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
-        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} >
           {variant === "REGISTER" && (
-            <Input id="name" label="Name" register={register} errors={errors} disabled={isLoading} />
+            <Input
+              id="name"
+              label="Name"
+              register={register}
+              errors={errors}
+              disabled={isLoading}
+            />
           )}
 
           <Input
@@ -104,10 +112,6 @@ const AuthForm = () => {
             <AuthSocialButton
               icon={BsGithub}
               onClick={() => socialAction("github")}
-            />
-            <AuthSocialButton
-              icon={BsGoogle}
-              onClick={() => socialAction("goolge")}
             />
           </div>
         </div>
