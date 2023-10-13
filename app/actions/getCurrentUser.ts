@@ -3,10 +3,12 @@ import getSeesion from './getSession';
 
 const getCurrentUser = async () => {
     try {
+
         const session = await getSeesion();
         if (!session?.user?.email) {
             return null;
         }
+        console.log('ss')
 
         const currentUser = await prisma.user.findUnique({
             where: {
