@@ -32,19 +32,61 @@ export async function POST(
                         connect: [
                             ...members.map((member: { value: string }) => ({ id: member.value })),
                             {
-                                id : currentUser.id
+                                id: currentUser.id
                             }
                         ]
                     }
                 },
-                include : {
-                    users : true
+                include: {
+                    users: true
                 }
             });
 
             return NextResponse.json(newConverstaion);
         }
 
+        const existingConversations = await prisma.conversation.findMany({
+            where: {
+                OR: [
+                    {
+                        userIds: {
+                            equals: [currentUser.id, userId]
+                        }
+                    },
+                    {
+                        userIds: {
+                            equals: [userId, currentUser.id]
+                        }
+                    }
+                ]
+            }
+        });
+
+        const singleConversation = existingConversations[0];
+        if (singleConversation) {
+            return NextResponse.json(singleConversation);
+        }
+
+        const NewConversation = await prisma.conversation.create({
+            data: {
+                users: {
+                    connect: [
+                        {
+                            id: currentUser.id
+                        },
+                        {
+                            id: userId
+                        }
+                    ]
+                }
+            },
+            include: {
+                users: true
+            }
+        });
+
+        return NextResponse.json(NewConversation);
+        
     } catch (error: any) {
         return new NextResponse('Internal Error ', { status: 500 })
     }
