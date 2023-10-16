@@ -32,7 +32,7 @@ const ConverationBox: React.FC<ConverationBoxProb> = ({
   const router = useRouter();
 
   const handleClick = useCallback(() => {
-    router.push(`'conversations/${data.id}`);
+    router.push(`conversations/${data.id}`);
   }, [data.id, router]);
 
   const lastMassage = useMemo(() => {
