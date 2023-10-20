@@ -5,20 +5,17 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
 interface UserBoxProbs {
-  key?: string;
   data: User;
 }
 
-const UserBox: React.FC<UserBoxProbs> = ({ key, data }) => {
+const UserBox: React.FC<UserBoxProbs> = ({ data }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const handelClick = useCallback(() => {
     setIsLoading(true);
     axios
-      .post("api/conversations", {
-        userId: data.id,
-      })
+      .post("/api/conversations", { userId: data.id })
       .then((data) => {
         router.push(`/conversations/${data.data.id}`);
       })

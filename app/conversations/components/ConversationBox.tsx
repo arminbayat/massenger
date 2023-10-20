@@ -16,23 +16,17 @@ import useOtherUser from "@/app/hooks/useOtherUser";
 import Avatar from "@/app/components/Avatar";
 
 interface ConverationBoxProb {
-  key: String;
   data: FullConversationType;
   selected?: boolean;
 }
 
-const ConverationBox: React.FC<ConverationBoxProb> = ({
-  key,
-  data,
-  selected,
-}) => {
-  console.log("data");
+const ConverationBox: React.FC<ConverationBoxProb> = ({ data, selected }) => {
   const otherUser = useOtherUser(data);
   const session = useSession();
   const router = useRouter();
 
   const handleClick = useCallback(() => {
-    router.push(`conversations/${data.id}`);
+    router.push(`/conversations/${data.id}`);
   }, [data.id, router]);
 
   const lastMassage = useMemo(() => {

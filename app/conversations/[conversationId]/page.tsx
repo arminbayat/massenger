@@ -4,13 +4,12 @@ import EmptyState from "@/app/components/EmptyState";
 import Header from "./components/Header";
 
 interface Iparams {
-  convesationId: string;
+  conversationId: string;
 }
 
-const convesationId = async ({ params }: { params: Iparams }) => {
-  const conversation = await getConversationById(params.convesationId);
-
-  const massages = await getMassages(params.convesationId);
+const ChatId = async ({ params }: { params: Iparams }) => {
+  const conversation = await getConversationById(params.conversationId);
+  const massages = await getMassages(params.conversationId);
 
   if (!conversation) {
     return (
@@ -22,12 +21,12 @@ const convesationId = async ({ params }: { params: Iparams }) => {
     );
   }
   return (
-    <div className="lg-pl-80 h-full">
-      <div className="h-full flex flex-col ">
+    <div className="lg:pl-80 h-full">
+      <div className="h-full flex flex-col">
         <Header conversation={conversation} />
       </div>
     </div>
   );
 };
 
-export default convesationId;
+export default ChatId;
