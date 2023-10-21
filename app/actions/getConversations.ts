@@ -7,6 +7,7 @@ const getConversations = async () => {
     if (!currentUser) {
         return [];
     }
+
     try {
         const conversations = await prisma.conversation.findMany({
             orderBy: {
@@ -33,4 +34,5 @@ const getConversations = async () => {
         return [];
     }
 };
+
 export default getConversations;
