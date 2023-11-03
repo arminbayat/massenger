@@ -98,8 +98,6 @@ export async function POST(
                 pusherServer.trigger(user.email, 'conversation:new', NewConversation);
             }
         });
-
-
         return NextResponse.json(NewConversation);
 
     } catch (error: any) {

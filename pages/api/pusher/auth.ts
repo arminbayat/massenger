@@ -1,55 +1,25 @@
-import getCurrentUser from "@/app/actions/getCurrentUser";
-import { NextResponse } from "next/server";
+import { NextApiRequest, NextApiResponse } from "next"
+import { getServerSession } from "next-auth";
 
-import prisma from "@/app/libs/prismadb";
 import { pusherServer } from "@/app/libs/pusher";
+import { authOption } from "@/app/api/auth/[...nextauth]/route";
 
-interface IParams {
-    conversationId?: string;
-}
-
-export async function DELETE(
-    request: Request,
-    { params }: { params: IParams }
+export default async function handler(
+    request: NextApiRequest,
+    response: NextApiResponse
 ) {
-    try {
-        const { conversationId } = params;
-        const currentUser = await getCurrentUser();
+    const session = await getServerSession(request, response, authOption);
 
-        if (!currentUser?.id) {
-            return NextResponse.json(null);
-        }
-
-        const existingConversation = await prisma.conversation.findUnique({
-            where: {
-                id: conversationId
-            },
-            include: {
-                users: true
-            }
-        });
-
-        if (!existingConversation) {
-            return new NextResponse('Invalid ID', { status: 400 });
-        }
-
-        const deletedConversation = await prisma.conversation.deleteMany({
-            where: {
-                id: conversationId,
-                userIds: {
-                    hasSome: [currentUser.id]
-                },
-            },
-        });
-
-        existingConversation.users.forEach((user) => {
-            if (user.email) {
-                pusherServer.trigger(user.email, 'conversation:remove', existingConversation);
-            }
-        });
-
-        return NextResponse.json(deletedConversation)
-    } catch (error) {
-        return NextResponse.json(null);
+    if (!session?.user?.email) {
+        return response.status(401);
     }
-}
+
+    const socketId = request.body.socket_id;
+    const channel = request.body.channel_name;
+    const data = {
+        user_id: session.user.email,
+    };
+
+    const authResponse = pusherServer.authorizeChannel(socketId, channel, data);
+    return response.send(authResponse);
+};
