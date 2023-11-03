@@ -10,7 +10,7 @@ const getMassages = async (
             },
             include: {
                 seen: true,
-                sender: true
+                sender: true,
             },
             orderBy: {
                 createdAt: 'asc'
@@ -19,7 +19,7 @@ const getMassages = async (
 
         return massages;
     } catch (error: any) {
-        return null;
+        return [];
     }
 }
 
