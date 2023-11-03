@@ -6,22 +6,22 @@ const getCurrentUser = async () => {
         const session = await getSeesion();
 
         if (!session?.user?.email) {
-            return null;
+            // return null;
         }
 
         const currentUser = await prisma.user.findUnique({
             where: {
-                email: session.user.email as string
+                email: session?.user?.email as string
             }
         });
 
         if (!currentUser) {
-            return null;
+            // return null;
         }
 
         return currentUser;
     } catch (error: any) {
-        return null;
+        // return null;
     }
 };
 

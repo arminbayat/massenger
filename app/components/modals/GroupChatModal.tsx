@@ -5,24 +5,23 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { User } from "@prisma/client";
-import { CldUploadButton } from "next-cloudinary";
 
 import Input from "../inputs/Input";
-import Modal from "../modals/Modal";
+import Select from "../inputs/Select";
+import Modal from "./Modal";
 import Button from "../Button";
-import Image from "next/image";
 import { toast } from "react-hot-toast";
 
-interface SettingsModalProps {
+interface GroupChatModalProps {
   isOpen?: boolean;
   onClose: () => void;
-  currentUser: User;
+  users: User[];
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({
+const GroupChatModal: React.FC<GroupChatModalProps> = ({
   isOpen,
   onClose,
-  currentUser = {},
+  users = [],
 }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -35,24 +34,21 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     formState: { errors },
   } = useForm<FieldValues>({
     defaultValues: {
-      name: currentUser?.name,
-      image: currentUser?.image,
+      name: "",
+      members: [],
     },
   });
 
-  const image = watch("image");
-
-  const handleUpload = (result: any) => {
-    setValue("image", result.info.secure_url, {
-      shouldValidate: true,
-    });
-  };
+  const members = watch("members");
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
 
     axios
-      .post("/api/settings", data)
+      .post("/api/conversations", {
+        ...data,
+        isGroup: true,
+      })
       .then(() => {
         router.refresh();
         onClose();
@@ -67,10 +63,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="space-y-12">
           <div className="border-b border-gray-900/10 pb-12">
             <h2 className="text-base font-semibold leading-7 text-gray-900">
-              Profile
+              Create a group chat
             </h2>
             <p className="mt-1 text-sm leading-6 text-gray-600">
-              Edit your public information.
+              Create a chat with more than 2 people.
             </p>
             <div className="mt-10 flex flex-col gap-y-8">
               <Input
@@ -81,44 +77,34 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 required
                 register={register}
               />
-              <div>
-                <label
-                  htmlFor="photo"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Photo
-                </label>
-                <div className="mt-2 flex items-center gap-x-3">
-                  <Image
-                    width="48"
-                    height="48"
-                    className="rounded-full"
-                    src={
-                      image || currentUser?.image || "/images/placeholder.jpg"
-                    }
-                    alt="Avatar"
-                  />
-                  <CldUploadButton
-                    options={{ maxFiles: 1 }}
-                    onUpload={handleUpload}
-                    uploadPreset="ep8bfzj9"
-                  >
-                    <Button disabled={isLoading} secondary type="button">
-                      Change
-                    </Button>
-                  </CldUploadButton>
-                </div>
-              </div>
+              <Select
+                disabled={isLoading}
+                label="Members"
+                options={users.map((user) => ({
+                  value: user.id,
+                  label: user.name,
+                }))}
+                onChange={(value) =>
+                  setValue("members", value, {
+                    shouldValidate: true,
+                  })
+                }
+                value={members}
+              />
             </div>
           </div>
         </div>
-
-        <div className=" mt-6 flex items-center justify-end gap-x-6">
-          <Button disabled={isLoading} secondary onClick={onClose}>
+        <div className="mt-6 flex items-center justify-end gap-x-6">
+          <Button
+            disabled={isLoading}
+            onClick={onClose}
+            type="button"
+            secondary
+          >
             Cancel
           </Button>
           <Button disabled={isLoading} type="submit">
-            Save
+            Create
           </Button>
         </div>
       </form>
@@ -126,4 +112,4 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   );
 };
 
-export default SettingsModal;
+export default GroupChatModal;
